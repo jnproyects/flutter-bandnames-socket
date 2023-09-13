@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:band_names/presentation/models/band.dart';
@@ -45,9 +48,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
       floatingActionButton: FloatingActionButton(
         elevation: 1,
-        onPressed: () {
-          
-        },
+        onPressed: addNewBand,
         child: const Icon(
           Icons.add
         ),
@@ -81,4 +82,84 @@ class _HomeScreenState extends State<HomeScreen> {
 
     );
   }
+
+
+  addNewBand(){
+
+    final textController = TextEditingController();
+
+    // Android
+    if ( Platform.isAndroid ) {
+      return showDialog(
+        context: context, 
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('New band name'),
+            content: TextField(
+              controller: textController,
+            ),
+            actions: [
+              MaterialButton(
+                elevation: 5,
+                textColor: Colors.blue,
+                onPressed: () => addBandToList( textController.text ),
+                child: const Text('Add'),
+              )
+            ],
+          );
+        }
+      );
+    }
+
+    //IOS
+    showCupertinoDialog(
+      context: context, 
+      builder: ( _ ) {
+        return CupertinoAlertDialog(
+          title: const Text(
+            'New band name'
+          ),
+          content: CupertinoTextField(
+            controller: textController,
+          ),
+          actions: [
+
+            CupertinoDialogAction(
+              isDefaultAction: true,
+              onPressed: () => addBandToList( textController.text ),
+              child: const Text(
+                'Add'
+              )
+            ),
+
+            CupertinoDialogAction(
+              isDestructiveAction: true,
+              onPressed: () => Navigator.pop(context),
+              child: const Text(
+                'Dismiss'
+              )
+            ),
+
+          ],
+        );
+      },
+    );
+    
+  }
+
+
+
+  void addBandToList( String bandName ){
+    
+    if ( bandName.length > 1 ) {
+      bands.add(
+        Band(id: DateTime.now().toString(), name: bandName, votes: 0)
+      );
+      setState(() {});
+    }
+
+    Navigator.pop(context);
+
+  }
+
 }
