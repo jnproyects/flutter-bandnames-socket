@@ -3,8 +3,10 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import 'package:band_names/presentation/models/band.dart';
+import 'package:provider/provider.dart';
 
+import 'package:band_names/presentation/models/band.dart';
+import 'package:band_names/shared/services/socket_service.dart';
 
 class HomeScreen extends StatefulWidget {
 
@@ -15,19 +17,56 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
 
   List<Band> bands = [
-    Band(id: '1', name: 'Megadeth', votes: 5 ),
-    Band(id: '2', name: 'Suicidal Tendencies', votes: 7 ),
-    Band(id: '3', name: 'Obituary', votes: 10 ),
-    Band(id: '4', name: 'Kreator', votes: 8 ),
-    Band(id: '5', name: 'The Rolling Stones', votes: 6 ),
+    // Band(id: '1', name: 'Megadeth', votes: 5 ),
+    // Band(id: '2', name: 'Suicidal Tendencies', votes: 7 ),
+    // Band(id: '3', name: 'Obituary', votes: 10 ),
+    // Band(id: '4', name: 'Kreator', votes: 8 ),
+    // Band(id: '5', name: 'The Rolling Stones', votes: 6 ),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+
+    final socketService = Provider.of<SocketService>(context, listen: false);
+    socketService.socket.on('active-bands', ( data ) {
+      bands = ( data as List ).map( (band) => Band.fromMap( band ) ).toList();
+    });
+    setState((){});
+  }
+
+  @override
+  void dispose() {
+    final socketService = Provider.of<SocketService>(context, listen: false);
+    socketService.socket.off('active-bands');
+    
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
 
+    final socketService = Provider.of<SocketService>(context);
+
     return Scaffold(
       
       appBar: AppBar(
+        actions: [
+          Container(
+            margin: const EdgeInsets.only( right: 10 ),
+            child: ( socketService.serverStatus == ServerStatus.online )
+            ? Icon(
+                Icons.check_circle_outlined,
+                color: Colors.blue[300]
+              )
+
+            : Icon(
+                Icons.offline_bolt,
+                color: Colors.red[300]
+              ),
+          ),
+        ],
+        backgroundColor: Colors.white,
         elevation: 1,
         title: const Text(
           'Band Names',
@@ -35,7 +74,6 @@ class _HomeScreenState extends State<HomeScreen> {
             color: Colors.black87
           )
         ),
-        backgroundColor: Colors.white
       ),
 
       body: ListView.builder(
