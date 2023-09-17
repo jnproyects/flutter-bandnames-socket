@@ -16,13 +16,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
 
-  List<Band> bands = [
-    // Band(id: '1', name: 'Megadeth', votes: 5 ),
-    // Band(id: '2', name: 'Suicidal Tendencies', votes: 7 ),
-    // Band(id: '3', name: 'Obituary', votes: 10 ),
-    // Band(id: '4', name: 'Kreator', votes: 8 ),
-    // Band(id: '5', name: 'The Rolling Stones', votes: 6 ),
-  ];
+  List<Band> bands = [];
 
   @override
   void initState() {
@@ -31,8 +25,8 @@ class _HomeScreenState extends State<HomeScreen> {
     final socketService = Provider.of<SocketService>(context, listen: false);
     socketService.socket.on('active-bands', ( data ) {
       bands = ( data as List ).map( (band) => Band.fromMap( band ) ).toList();
+      setState((){});
     });
-    setState((){});
   }
 
   @override
@@ -96,6 +90,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _bandTile(Band band) {
+
+    final socketService = Provider.of<SocketService>( context, listen: false );
     
     return Dismissible(
       key: Key( band.id ),
@@ -134,7 +130,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
     
         onTap: () {
-          print(band.name);
+          socketService.emit('vote-band', { 'id': band.id } );
         },
     
       ),
@@ -210,10 +206,21 @@ class _HomeScreenState extends State<HomeScreen> {
   void addBandToList( String bandName ){
     
     if ( bandName.length > 1 ) {
-      bands.add(
-        Band(id: DateTime.now().toString(), name: bandName, votes: 0)
-      );
-      setState(() {});
+      // provider false
+      // emitir: add-band
+      // { name: bandName } 
+      final socketService = Provider.of<SocketService>( context, listen: false );
+      socketService.emit( 'add-band', { 'name': bandName } );
+      
+      
+      
+      // bands.add(
+      //   Band(id: DateTime.now().toString(), name: bandName, votes: 0)
+      // );
+      // setState(() {});
+
+
+
     }
 
     Navigator.pop(context);
