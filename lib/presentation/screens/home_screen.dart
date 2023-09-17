@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:pie_chart/pie_chart.dart';
 
 import 'package:provider/provider.dart';
 
@@ -72,12 +73,23 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
 
-      body: ListView.builder(
-        itemCount: bands.length,
-        itemBuilder: ( BuildContext context, int index ) {
-          final band = bands[index];
-          return _bandTile(band);
-        },
+      body: Column(
+        children: [
+
+          if ( socketService.serverStatus == ServerStatus.online )
+            _showChart(),
+
+          Expanded(
+            child: ListView.builder(
+              itemCount: bands.length,
+              itemBuilder: ( BuildContext context, int index ) {
+                final band = bands[index];
+                return _bandTile(band);
+              },
+            ),
+          ),
+
+        ],
       ),
 
       floatingActionButton: FloatingActionButton(
@@ -210,6 +222,70 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     Navigator.pop(context);
+
+  }
+
+  Widget _showChart(){
+    
+    // Map<String, double> dataMap = {
+    //   "Flutter": 5,
+    //   "React": 3,
+    //   "Xamarin": 2,
+    //   "Ionic": 2,
+    // };
+
+    Map<String, double> dataMap = {};
+    
+    bands.forEach(( band ) {
+      dataMap.putIfAbsent( band.name, () => band.votes.toDouble() );
+    });
+
+
+
+    final List<Color> colorList = [
+      Colors.blue[50]!,
+      Colors.blue[200]!,
+      Colors.purple[50]!,
+      Colors.purple[200]!,
+      Colors.yellow[50]!,
+      Colors.yellow[200]!,
+    ];
+
+
+    return Container(
+      padding: const EdgeInsets.only( top: 5 ),
+      width: double.infinity,
+      height: 200,
+      child: PieChart(
+      dataMap: dataMap,
+      animationDuration: const Duration(milliseconds: 800),
+      // chartLegendSpacing: 32,
+      chartRadius: MediaQuery.of(context).size.width / 3.2,
+      colorList: colorList,
+      initialAngleInDegree: 0,
+      chartType: ChartType.ring,
+      // ringStrokeWidth: 32,
+      // centerText: "HYBRID",
+      legendOptions: const LegendOptions(
+        showLegendsInRow: false,
+        legendPosition: LegendPosition.right,
+        showLegends: true,
+        // legendShape: _BoxShape.circle,
+        legendTextStyle: TextStyle(
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      chartValuesOptions: const ChartValuesOptions(
+        showChartValueBackground: true,
+        showChartValues: true,
+        showChartValuesInPercentage: false,
+        showChartValuesOutside: false,
+        decimalPlaces: 1,
+      ),
+      // gradientList: ---To add gradient colors---
+      // emptyColorGradient: ---Empty Color gradient---
+    )
+    );
 
   }
 
