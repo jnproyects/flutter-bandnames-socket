@@ -25,10 +25,16 @@ class SocketService with ChangeNotifier {
 
     // Dart client
 
-    // reemplazar por dirección ip ó por 'http://10.0.2.2:3000'
+    // con emuladores reemplazar por dirección ip ó por 'http://10.0.2.2:3000'
     //10.0.2.2 es una dirección IP especial utilizada en entornos de emuladores de Android.
-    // IO.Socket socket = IO.io('http://localhost:3000/', {
-    _socket = IO.io('http://192.168.1.2:3000/', {
+
+    // IO.Socket socket = IO.io('http://localhost:3000/', { // no funcionó
+
+    // para probar en dispositivo físico
+    // _socket = IO.io('ipmaquina:3000/', {  // server corriendo de forma local
+
+    // server corriendo en la nube
+    _socket = IO.io('https://flutter-socket-server-f1d1.onrender.com/', {
       'transports': ['websocket'],
       'autoConnect': true
     });
